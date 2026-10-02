@@ -15,7 +15,6 @@ O modelo é instruído a usar só o que está no chamado, preservar negação e 
 | `src/chamados/avaliacao/` | O mesmo avaliador de classificação da v4. |
 | `resultado-avaliacao.json` | Amostra da classificação. |
 | `resultado-avaliacao-resumo.json` | Amostra de uma rodada de resumo com `llama3.2:latest` (5 casos, acurácia e formato 1 nessa execução). |
-| `frontend/` | Chat em fluxo. Não dispara o resumo. |
 
 Limites que `interpretarResumo` exige:
 
@@ -50,19 +49,11 @@ Avaliação da classificação (Ollama no ar; reescreve `resultado-avaliacao.jso
 npm run avaliar:chamados
 ```
 
-Tela de stream:
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
 Ollama, Node e `.env`: [README da raiz](../README.md).
 
 ## Contratos
 
-Classificação, stream e conversas: os mesmos da [v1](../atv-pratica-v1/README.md), da [v2](../atv-pratica-v2/README.md) e da [v3](../atv-pratica-v3/README.md).
+Classificação: a mesma da [v4](../atv-pratica-v4/README.md).
 
 Resumo:
 
