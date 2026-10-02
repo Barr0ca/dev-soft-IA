@@ -1,0 +1,17 @@
+# Dependências e artefatos de build
+**/node_modules/
+**/dist/
+**/.angular/
+**/.venv*/
+**/coverage/
+**/*.tsbuildinfo
+
+# Configuração local (o modelo fica na máquina de quem clona)
+**/.env
+!**/.env.example
+
+# Cópias compactadas das pastas; o código versionado é o das pastas
+*.zip
+
+.DS_Store
+Thumbs.db
