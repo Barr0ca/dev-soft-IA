@@ -14,6 +14,6 @@ export class ChamadosController {
 
   @Post("resumir")
   resumir(@Body() dto: ResumirChamadoDto) {
-    return { texto: dto.texto };
+    return this.chamados.resumir(dto.texto);
   }
 }
