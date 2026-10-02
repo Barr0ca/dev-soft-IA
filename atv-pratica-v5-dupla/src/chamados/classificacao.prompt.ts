@@ -18,8 +18,8 @@ export function buildClassificacaoPrompt(texto: string): string {
   6. Se não houver evidência suficiente, responda OUTROS.
   7. Responda somente com um nome da lista, em letras maiúsculas.
   
-  <chamado>
-  ${texto.trim()}
-  </chamado>
+<chamado>
+${texto.trim()}
+</chamado>
     `.trim();
 }
