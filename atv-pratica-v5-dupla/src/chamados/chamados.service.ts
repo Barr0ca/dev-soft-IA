@@ -12,6 +12,8 @@ import { isChamadoCategoria, type ChamadoCategoria } from "./chamado.categoria";
 import { buildClassificacaoPrompt } from "./classificacao.prompt";
 import { buildResumoPrompt } from "./resumo.prompt";
 import { interpretarResumo } from "./resumo.chamado";
+import { buildSugestaoPrompt } from "./sugestao.prompt";
+import { interpretarSugestao } from "./sugestao.chamado";
 
 export interface ClassificacaoResultado {
   texto: string;
@@ -63,6 +65,31 @@ export class ChamadosService {
     return {
       ...interpretado,
       revisaoHumana: texto.length < 40 ? true : interpretado.revisaoHumana,
+      modelo: resultado.modelo,
+    };
+  }
+
+  async sugerir(textoOriginal: string) {
+    const texto = textoOriginal.trim();
+
+    if (!texto) {
+      throw new BadRequestException("O texto do chamado é obrigatório");
+    }
+
+    const prompt = buildSugestaoPrompt(texto);
+    const resultado = await this.modelo.gerar({ mensagem: prompt });
+    const interpretado = interpretarSugestao(resultado.resposta, texto);
+
+    if (!interpretado) {
+      throw new BadGatewayException(
+        "O modelo retornou uma sugestão fora do contrato",
+      );
+    }
+
+    return {
+      rascunho: interpretado.rascunho,
+      informacoesAdicionais: interpretado.informacoesAdicionais,
+      revisaoHumana: true,
       modelo: resultado.modelo,
     };
   }
