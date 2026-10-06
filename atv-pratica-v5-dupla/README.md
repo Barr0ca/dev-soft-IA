@@ -13,7 +13,6 @@ O modelo é instruído a usar só o que está no chamado, preservar negação e 
 | `src/chamados/dto/resumir-chamado.dto.ts` | `texto` de 1 a 2000 caracteres. |
 | `src/chamados/chamados.controller.ts` | `POST /chamados/classificar` e `POST /chamados/resumir`. |
 | `src/chamados/avaliacao/` | O mesmo avaliador de classificação da v4. |
-| `resultado-avaliacao.json` | Amostra da classificação. |
 | `resultado-avaliacao-resumo.json` | Amostra de uma rodada de resumo com `llama3.2:latest` (5 casos, acurácia e formato 1 nessa execução). |
 
 Limites que `interpretarResumo` exige:
@@ -41,12 +40,6 @@ Um `POST` sem `@HttpCode(200)` responde `201`. A classificação segue completa,
 cp .env.example .env
 npm install
 npm run start:dev
-```
-
-Avaliação da classificação (Ollama no ar; reescreve `resultado-avaliacao.json`):
-
-```bash
-npm run avaliar:chamados
 ```
 
 Ollama, Node e `.env`: [README da raiz](../README.md).
