@@ -1,1 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+html,
+body,
+app-root,
+main {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #14202b;
+  background: #e8eef3;
+}
+
+main {
+  box-sizing: border-box;
+  display: flex;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+button,
+textarea {
+  font-family: inherit;
+}

@@ -1,0 +1,128 @@
+<section class="chat" aria-label="Resumo de chamados">
+  <header class="topo">
+    <div>
+      <h1>Resumo de chamados</h1>
+      <p>Cole o texto. A leitura da fila mostra o título, o resumo e até três pontos explícitos.</p>
+    </div>
+  </header>
+
+  <ol class="historico">
+    @if (turnos().length === 0) {
+      <li class="vazio">
+        <p class="vazio-titulo">Comece por um chamado</p>
+        <p>
+          O resultado só usa o que está escrito no texto. Se faltar informação, a resposta pede
+          revisão humana.
+        </p>
+        <div class="exemplos" role="group" aria-label="Exemplos de chamado">
+          @for (exemplo of exemplos; track exemplo.rotulo) {
+            <button type="button" (click)="preencher(exemplo.texto)">
+              {{ exemplo.rotulo }}
+            </button>
+          }
+        </div>
+      </li>
+    }
+
+    @for (turno of turnos(); track turno.id) {
+      <li class="turno">
+        <article class="chamado">
+          <p class="papel">Chamado</p>
+          @if (turno.texto.length > 280) {
+            <details>
+              <summary>Ver texto completo</summary>
+              <p class="texto">{{ turno.texto }}</p>
+            </details>
+          } @else {
+            <p class="texto">{{ turno.texto }}</p>
+          }
+        </article>
+
+        <article
+          class="cartao"
+          [attr.aria-busy]="turno.status === 'loading'"
+          aria-live="polite"
+        >
+          @switch (turno.status) {
+            @case ('loading') {
+              <p class="selo espera">
+                <span class="spinner" aria-hidden="true"></span>
+                Gerando título e resumo
+              </p>
+            }
+            @case ('cancelled') {
+              <p class="selo">Envio cancelado</p>
+              <button type="button" class="secundario" (click)="preencher(turno.texto)">
+                Restaurar texto
+              </button>
+            }
+            @case ('error') {
+              <p class="selo perigo">Não foi possível resumir</p>
+              <p class="erro">{{ turno.erro }}</p>
+              <button type="button" class="secundario" (click)="preencher(turno.texto)">
+                Editar e tentar de novo
+              </button>
+            }
+            @case ('done') {
+              @if (turno.resumo) {
+                @if (turno.resumo.revisaoHumana) {
+                  <p class="selo alerta">Precisa de revisão humana</p>
+                } @else {
+                  <p class="selo ok">Leitura pronta</p>
+                }
+
+                <h2>{{ turno.resumo.titulo }}</h2>
+                <p class="texto">{{ turno.resumo.resumo }}</p>
+
+                <h3>Pontos importantes</h3>
+                @if (turno.resumo.pontosImportantes.length === 0) {
+                  <p class="estado">Nenhum ponto explícito no texto.</p>
+                } @else {
+                  <ol class="pontos">
+                    @for (ponto of turno.resumo.pontosImportantes; track $index) {
+                      <li>{{ ponto }}</li>
+                    }
+                  </ol>
+                }
+
+                <p class="modelo">Gerado por {{ turno.resumo.modelo }}</p>
+              }
+            }
+          }
+        </article>
+      </li>
+    }
+    <li #fim></li>
+  </ol>
+
+  <form class="composer" (ngSubmit)="enviar()">
+    <label for="texto">Texto do chamado</label>
+    <textarea
+      #campo
+      id="texto"
+      name="texto"
+      [(ngModel)]="texto"
+      maxlength="2000"
+      rows="4"
+      required
+      [disabled]="enviando()"
+      placeholder="Cole aqui o relato do chamado"
+      (keydown)="aoTeclar($event)"
+    ></textarea>
+
+    <div class="barra">
+      <p class="contador" [class.perto]="texto.length >= 1800">
+        {{ texto.length }} / 2000
+        <span class="atalho">Ctrl + Enter envia</span>
+      </p>
+      <div class="acoes">
+        @if (enviando()) {
+          <button type="button" class="secundario" (click)="cancelar()">Cancelar</button>
+        }
+        <button type="submit" class="primario" [disabled]="enviando() || texto.trim().length === 0">
+          Resumir chamado
+        </button>
+      </div>
+    </div>
+  </form>
+</section>
