@@ -1,13 +1,27 @@
 services:
   ollama:
     image: ollama/ollama
-    container_name: ollama-v2
+    container_name: ollama
     ports:
       - "11434:11434"
     environment:
       OLLAMA_ORIGINS: "http://127.0.0.1:5500,http://localhost:5500"
     volumes:
       - ollama-data:/root/.ollama
+
+  backend:
+    build:
+      context: .
+    container_name: backend
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:latest}
+      OLLAMA_TIMEOUT_MS: ${OLLAMA_TIMEOUT_MS:-30000}
+    depends_on:
+      - ollama
 
   frontend:
     build:
@@ -23,6 +37,4 @@ services:
 
 volumes:
   ollama-data:
-    external: true
-    name: docker-ollama_ollama-data
   frontend_node_modules:
