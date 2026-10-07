@@ -1,8 +1,8 @@
 # Frontend da atv-pratica-v5-dupla
 
-Chat em fluxo, igual ao das atividades anteriores. Envia `{ "mensagem": "..." }` para `POST http://localhost:3000/ia/responder-stream` e mostra os `delta`. **Cancelar** aborta o `fetch`.
+Chat para resumir um chamado. Envia `{ "texto": "..." }` para `POST http://localhost:3000/chamados/resumir` e mostra título, resumo, até três pontos importantes e se a resposta pede revisão humana. **Cancelar** aborta o `fetch`.
 
-Classificação, avaliação e resumo do chamado ficam na API. Veja o [README da atividade](../README.md).
+O contrato, os limites do JSON e o Docker estão no [README da atividade](../README.md).
 
 ## Como iniciar
 

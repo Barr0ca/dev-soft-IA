@@ -14,6 +14,10 @@ O modelo é instruído a usar só o que está no chamado, preservar negação e 
 | `src/chamados/chamados.controller.ts` | `POST /chamados/classificar` e `POST /chamados/resumir`. |
 | `src/chamados/avaliacao/` | O mesmo avaliador de classificação da v4. |
 | `resultado-avaliacao-resumo.json` | Amostra de uma rodada de resumo com `llama3.2:latest` (5 casos, acurácia e formato 1 nessa execução). |
+| `Dockerfile` | Imagem do backend: Node 22, `npm ci`, `npm run build` e `npm run start:prod` na porta 3000. |
+| `docker-compose.yml` | Sobe Ollama, o backend e a tela Angular. |
+| `frontend/src/app/chamados/chamados.service.ts` | `resumir`: `POST /chamados/resumir` com `{ texto }`. |
+| `frontend/src/app/chamados/chat-resumo/` | Chat que mostra título, resumo, pontos e se pede revisão humana. |
 
 Limites que `interpretarResumo` exige:
 
@@ -35,6 +39,10 @@ Texto vazio depois do `trim` responde `400`. JSON fora dos limites responde `502
 Um `POST` sem `@HttpCode(200)` responde `201`. A classificação segue completa, inclusive o script `npm run avaliar:chamados`.
 
 ## Como iniciar
+
+Dois caminhos. Os dois usam o mesmo contrato. Ollama, Node e o `.env` de execução na máquina: [README da raiz](../README.md).
+
+### Na máquina
 
 ```bash
 cp .env.example .env
