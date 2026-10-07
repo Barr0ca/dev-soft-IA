@@ -15,6 +15,10 @@ O modelo é instruído a usar só o que está no chamado, preservar negação e 
 | `src/chamados/avaliacao/` | O mesmo avaliador de classificação da v4. |
 | `resultado-avaliacao.json` | Amostra da classificação. |
 | `resultado-avaliacao-resumo.json` | Amostra de uma rodada de resumo com `llama3.2:latest` (5 casos, acurácia e formato 1 nessa execução). |
+| `Dockerfile` | Imagem do backend: Node 22, `npm ci`, `npm run build` e `npm run start:prod` na porta 3000. |
+| `docker-compose.yml` | Sobe Ollama, o backend e a tela Angular. |
+| `frontend/src/app/chamados/chamados.service.ts` | `resumir`: `POST /chamados/resumir` com `{ texto }`. |
+| `frontend/src/app/chamados/chat-resumo/` | Chat que mostra título, resumo, pontos e se pede revisão humana. |
 
 Limites que `interpretarResumo` exige:
 
@@ -37,19 +41,69 @@ Um `POST` sem `@HttpCode(200)` responde `201`. A classificação segue completa,
 
 ## Como iniciar
 
+Dois caminhos. Os dois usam o mesmo contrato. Ollama, Node e o `.env` de execução na máquina: [README da raiz](../README.md).
+
+### Na máquina
+
 ```bash
 cp .env.example .env
 npm install
 npm run start:dev
 ```
 
-Avaliação da classificação (Ollama no ar; reescreve `resultado-avaliacao.json`):
+Em outro terminal, a tela:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Abra `http://localhost:4200`. A API só aceita CORS de `http://localhost:4200` em `POST`.
+
+### No Docker
+
+O Compose desta pasta sobe os três serviços. Ele cria o volume próprio `ollama-data`. Baixe o modelo nesse serviço antes de resumir. A porta 11434 e o nome de contêiner `ollama` são únicos na máquina: pare um Ollama que já esteja no ar antes do `docker compose up`.
+
+Dentro da rede do Compose, o backend fala com o Ollama em `http://ollama:11434`. `OLLAMA_MODEL` e `OLLAMA_TIMEOUT_MS` vêm do `.env` da pasta; se faltarem, valem `llama3.2:latest` e `30000`. O navegador chama a API em `http://localhost:3000`.
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+docker compose exec ollama ollama pull llama3.2
+```
+
+| Serviço | Porta no host |
+| --- | --- |
+| `ollama` | 11434 |
+| `backend` | 3000 |
+| `frontend` | 4200 |
+
+A imagem do frontend roda `npm start` escutando em `0.0.0.0`. O código de `frontend/` está montado no contêiner; `node_modules` fica no volume `frontend_node_modules`. O `.dockerignore` do backend deixa `node_modules` e `dist` de fora da imagem: a instalação e o build acontecem dentro dela.
+
+Avaliação da classificação (Ollama no ar, na porta 11434; reescreve `resultado-avaliacao.json`):
 
 ```bash
 npm run avaliar:chamados
 ```
 
-Ollama, Node e `.env`: [README da raiz](../README.md).
+## Tela de resumo
+
+A raiz da aplicação Angular é o chat `app-chat-resumo`. O campo aceita até 2000 caracteres. **Resumir chamado** (ou Ctrl + Enter) envia o texto para `POST /chamados/resumir`.
+
+Enquanto a resposta não chega, o cartão fica em “Gerando título e resumo”. **Cancelar** aborta o `fetch`. Se a API responder erro, o cartão mostra a mensagem do backend — por exemplo, `O modelo retornou um resumo fora do contrato` no `502`.
+
+Quando `interpretarResumo` aceita o JSON, o cartão mostra:
+
+| Campo | Na tela |
+| --- | --- |
+| `titulo` | Título do cartão |
+| `resumo` | Texto logo abaixo |
+| `pontosImportantes` | Lista. Vazia aparece como “Nenhum ponto explícito no texto.” |
+| `revisaoHumana` | `true` → “Precisa de revisão humana”. `false` → “Leitura pronta” |
+| `modelo` | “Gerado por …” |
+
+Três exemplos preenchem o campo sem enviar: chamado objetivo, texto com uma negação e texto curto demais. O último deve voltar com revisão humana.
 
 ## Contratos
 
