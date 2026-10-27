@@ -5,16 +5,21 @@ import {
   Post,
   Res,
   ServiceUnavailableException,
-} from '@nestjs/common';
-import type { Response } from 'express';
-import { ResponderDto } from '../conversas/dto/enviar-mensagem.dto';
-import { IaService } from './ia.service';
+  UploadedFile,
+  UseInterceptors,
+} from "@nestjs/common";
+import type { Response } from "express";
+import { ResponderDto } from "../conversas/dto/enviar-mensagem.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { memoryStorage } from "multer";
+import { AnalisarArquivoDto } from "./dto/analisar-arquivo.dto";
+import { IaService } from "./ia.service";
 
-@Controller('ia')
+@Controller("ia")
 export class IaController {
-  constructor(private readonly iaService: IaService) { }
+  constructor(private readonly iaService: IaService) {}
 
-  @Post('responder')
+  @Post("responder")
   async responder(@Body() dto: ResponderDto) {
     const resultado = await this.iaService.responder(dto.mensagem);
 
@@ -28,7 +33,7 @@ export class IaController {
     };
   }
 
-  @Post('responder-stream')
+  @Post("responder-stream")
   @HttpCode(200)
   async responderStream(
     @Body() dto: ResponderDto,
@@ -36,11 +41,11 @@ export class IaController {
   ): Promise<void> {
     const abortController = new AbortController();
 
-    response.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
-    response.setHeader('Cache-Control', 'no-cache, no-transform');
-    response.setHeader('X-Accel-Buffering', 'no');
+    response.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+    response.setHeader("Cache-Control", "no-cache, no-transform");
+    response.setHeader("X-Accel-Buffering", "no");
 
-    response.on('close', () => {
+    response.on("close", () => {
       if (!response.writableEnded) {
         abortController.abort();
       }
@@ -53,17 +58,17 @@ export class IaController {
       );
 
       for await (const content of stream) {
-        response.write(`${JSON.stringify({ type: 'delta', content })}\n`);
+        response.write(`${JSON.stringify({ type: "delta", content })}\n`);
       }
 
-      response.write(`${JSON.stringify({ type: 'done' })}\n`);
+      response.write(`${JSON.stringify({ type: "done" })}\n`);
       response.end();
     } catch {
       if (response.headersSent) {
         response.write(
           `${JSON.stringify({
-            type: 'error',
-            message: 'A geração foi interrompida',
+            type: "error",
+            message: "A geração foi interrompida",
           })}\n`,
         );
         response.end();
@@ -71,8 +76,25 @@ export class IaController {
       }
 
       throw new ServiceUnavailableException(
-        'Não foi possível iniciar a geração',
+        "Não foi possível iniciar a geração",
       );
     }
+  }
+
+  @Post("analisar-arquivo")
+  @UseInterceptors(
+    FileInterceptor("arquivo", {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+        files: 1,
+      },
+    }),
+  )
+  analisarArquivo(
+    @Body() dto: AnalisarArquivoDto,
+    @UploadedFile() arquivo?: Express.Multer.File,
+  ) {
+    return this.iaService.analisarArquivo(dto.prompt, arquivo);
   }
 }
