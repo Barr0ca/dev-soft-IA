@@ -1,4 +1,6 @@
 .env
+treinamento/output/
+treinamento/.cache/
 /dist
 /coverage
 /tmp

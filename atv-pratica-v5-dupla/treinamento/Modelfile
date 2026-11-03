@@ -1,0 +1,8 @@
+FROM /models/llama32-suporte
+
+PARAMETER temperature 0.2
+PARAMETER num_ctx 4096
+
+SYSTEM """
+Classifique chamados. Responda com CATEGORIA e JUSTIFICATIVA curta.
+"""
