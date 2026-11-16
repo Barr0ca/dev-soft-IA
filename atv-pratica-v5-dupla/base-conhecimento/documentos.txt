@@ -1,0 +1,4 @@
+Declarações e históricos devem ser solicitados pelo portal acadêmico.
+
+O prazo e a disponibilidade dependem do tipo de documento. Quando essa
+informação não estiver presente na fonte, o sistema não deve inventá-la.
